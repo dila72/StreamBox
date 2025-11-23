@@ -1,32 +1,36 @@
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { useSelector, useDispatch } from 'react-redux';
-import { addToFavorites, removeFromFavorites, selectIsFavorite } from '../store/favoritesSlice';
-import { TMDB_IMAGE_BASE_URL, IMAGE_SIZES } from '../utils/constants';
+import { API_CONFIG } from '../config/env';
 import { useTheme } from '../hooks/useTheme';
+import { useFavorites } from '../features/favorites/hooks/useFavorites';
 
-export default function MovieCard({ movie, onPress }) {
-  const dispatch = useDispatch();
+const MovieCard = memo(({ movie, onPress }) => {
   const { theme } = useTheme();
   const colors = theme.colors;
-  const isFavorite = useSelector((state) => selectIsFavorite(state, movie.id));
+  const { isFavorite, toggleFavorite } = useFavorites();
+  
+  const isMovieFavorite = isFavorite(movie.id);
 
   const imageUrl = movie.poster_path
-    ? `${TMDB_IMAGE_BASE_URL}${IMAGE_SIZES.POSTER_MEDIUM}${movie.poster_path}`
+    ? `${API_CONFIG.TMDB.IMAGE_BASE_URL}/${API_CONFIG.TMDB.IMAGE_SIZES.POSTER.MEDIUM}${movie.poster_path}`
     : 'https://via.placeholder.com/342x513/1e293b/ffffff?text=No+Image';
 
-  const handleFavoriteToggle = (e) => {
+  const handleFavoriteToggle = useCallback((e) => {
     e.stopPropagation();
-    if (isFavorite) {
-      dispatch(removeFromFavorites(movie.id));
-    } else {
-      dispatch(addToFavorites(movie));
-    }
-  };
+    toggleFavorite(movie);
+  }, [movie, toggleFavorite]);
+
+  const handlePress = useCallback(() => {
+    onPress?.(movie);
+  }, [movie, onPress]);
 
   return (
-    <TouchableOpacity style={[styles.card, { backgroundColor: colors.card }]} onPress={onPress} activeOpacity={0.7}>
+    <TouchableOpacity 
+      style={[styles.card, { backgroundColor: colors.card }]} 
+      onPress={handlePress} 
+      activeOpacity={0.7}
+    >
       <Image source={{ uri: imageUrl }} style={styles.poster} />
       <TouchableOpacity 
         style={[styles.favoriteButton, { backgroundColor: colors.background + 'CC' }]} 
@@ -36,8 +40,8 @@ export default function MovieCard({ movie, onPress }) {
         <Feather 
           name="heart" 
           size={20} 
-          color={isFavorite ? colors.primary : colors.textSecondary} 
-          fill={isFavorite ? colors.primary : 'transparent'} 
+          color={isMovieFavorite ? colors.primary : colors.textSecondary} 
+          fill={isMovieFavorite ? colors.primary : 'transparent'} 
         />
       </TouchableOpacity>
       
@@ -64,7 +68,9 @@ export default function MovieCard({ movie, onPress }) {
       </View>
     </TouchableOpacity>
   );
-}
+});
+
+MovieCard.displayName = 'MovieCard';
 
 const styles = StyleSheet.create({
   card: { 
@@ -109,3 +115,5 @@ const styles = StyleSheet.create({
   meta: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   year: { fontSize: 12 },
 });
+
+export default MovieCard;

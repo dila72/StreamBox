@@ -5,10 +5,12 @@ import { Feather } from '@expo/vector-icons';
 import { logoutUser } from '../../store/authSlice';
 import { clearFavorites } from '../../store/favoritesSlice';
 import { toggleTheme } from '../../store/themeSlice';
+import { useTheme } from '../../hooks/useTheme';
 
 export default function ProfileScreen() {
   const dispatch = useDispatch();
-  const { colors, mode } = useSelector((state) => state.theme);
+  const { theme, isDark } = useTheme();
+  const colors = theme.colors;
   const { user } = useSelector((state) => state.auth);
   const { favorites } = useSelector((state) => state.favorites);
 
@@ -48,9 +50,9 @@ export default function ProfileScreen() {
           <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>SETTINGS</Text>
           
           <TouchableOpacity style={[styles.item, { backgroundColor: colors.card }]} onPress={() => dispatch(toggleTheme())}>
-            <Feather name={mode === 'dark' ? 'moon' : 'sun'} size={20} color={colors.text} />
+            <Feather name={isDark ? 'moon' : 'sun'} size={20} color={colors.text} />
             <Text style={[styles.itemText, { color: colors.text }]}>Dark Mode</Text>
-            <Feather name={mode === 'dark' ? 'toggle-right' : 'toggle-left'} size={24} color={mode === 'dark' ? colors.primary : colors.textSecondary} />
+            <Feather name={isDark ? 'toggle-right' : 'toggle-left'} size={24} color={isDark ? colors.primary : colors.textSecondary} />
           </TouchableOpacity>
 
           {favorites.length > 0 && (

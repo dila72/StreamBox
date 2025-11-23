@@ -4,10 +4,12 @@ import { useSelector } from 'react-redux';
 import { Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import MovieCard from '../../components/MovieCard';
+import { useTheme } from '../../hooks/useTheme';
 
 export default function FavoritesScreen() {
   const navigation = useNavigation();
-  const { colors } = useSelector((state) => state.theme);
+  const { theme } = useTheme();
+  const colors = theme.colors;
   const { favorites } = useSelector((state) => state.favorites);
 
   return (

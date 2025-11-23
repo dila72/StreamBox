@@ -6,37 +6,39 @@ import { fetchMovieDetails } from '../../store/moviesSlice';
 import { addToFavorites, removeFromFavorites, selectIsFavorite } from '../../store/favoritesSlice';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { TMDB_IMAGE_BASE_URL, IMAGE_SIZES } from '../../utils/constants';
+import { useTheme } from '../../hooks/useTheme';
 
 export default function DetailsScreen({ route, navigation }) {
   const { movieId } = route.params;
   const dispatch = useDispatch();
-  const { colors } = useSelector((state) => state.theme);
-  const { currentMovie, isLoadingDetails } = useSelector((state) => state.movies);
+  const { theme } = useTheme();
+  const colors = theme.colors;
+  const { selectedMovie, isLoading } = useSelector((state) => state.movies);
   const isFavorite = useSelector((state) => selectIsFavorite(state, movieId));
 
   useEffect(() => {
     dispatch(fetchMovieDetails(movieId));
   }, [movieId]);
 
-  if (isLoadingDetails || !currentMovie) {
+  if (isLoading || !selectedMovie) {
     return <LoadingSpinner />;
   }
 
-  const posterUrl = currentMovie.poster_path
-    ? `${TMDB_IMAGE_BASE_URL}${IMAGE_SIZES.POSTER_LARGE}${currentMovie.poster_path}`
+  const posterUrl = selectedMovie.poster_path
+    ? `${TMDB_IMAGE_BASE_URL}${IMAGE_SIZES.POSTER_LARGE}${selectedMovie.poster_path}`
     : 'https://via.placeholder.com/500x750/1e293b/ffffff?text=No+Image';
 
-  const backdropUrl = currentMovie.backdrop_path
-    ? `${TMDB_IMAGE_BASE_URL}${IMAGE_SIZES.BACKDROP_LARGE}${currentMovie.backdrop_path}`
+  const backdropUrl = selectedMovie.backdrop_path
+    ? `${TMDB_IMAGE_BASE_URL}${IMAGE_SIZES.BACKDROP_LARGE}${selectedMovie.backdrop_path}`
     : null;
 
-  const trailer = currentMovie.videos?.results?.find((v) => v.type === 'Trailer' && v.site === 'YouTube');
+  const trailer = selectedMovie.videos?.results?.find((v) => v.type === 'Trailer' && v.site === 'YouTube');
 
   const handleFavoriteToggle = () => {
     if (isFavorite) {
       dispatch(removeFromFavorites(movieId));
     } else {
-      dispatch(addToFavorites(currentMovie));
+      dispatch(addToFavorites(selectedMovie));
     }
   };
 
@@ -62,16 +64,16 @@ export default function DetailsScreen({ route, navigation }) {
           <View style={styles.posterRow}>
             <Image source={{ uri: posterUrl }} style={styles.poster} />
             <View style={styles.info}>
-              <Text style={[styles.title, { color: colors.text }]}>{currentMovie.title || currentMovie.name}</Text>
+              <Text style={[styles.title, { color: colors.text }]}>{selectedMovie.title || selectedMovie.name}</Text>
               <View style={styles.metaRow}>
                 <View style={styles.rating}>
                   <Feather name="star" size={16} color={colors.rating} />
-                  <Text style={[styles.ratingText, { color: colors.text }]}>{currentMovie.vote_average?.toFixed(1)}</Text>
+                  <Text style={[styles.ratingText, { color: colors.text }]}>{selectedMovie.vote_average?.toFixed(1)}</Text>
                 </View>
-                <Text style={[styles.year, { color: colors.textSecondary }]}>{currentMovie.release_date?.split('-')[0] || currentMovie.first_air_date?.split('-')[0]}</Text>
+                <Text style={[styles.year, { color: colors.textSecondary }]}>{selectedMovie.release_date?.split('-')[0] || selectedMovie.first_air_date?.split('-')[0]}</Text>
               </View>
-              {currentMovie.runtime && (
-                <Text style={[styles.runtime, { color: colors.textSecondary }]}>{Math.floor(currentMovie.runtime / 60)}h {currentMovie.runtime % 60}m</Text>
+              {selectedMovie.runtime && (
+                <Text style={[styles.runtime, { color: colors.textSecondary }]}>{Math.floor(selectedMovie.runtime / 60)}h {selectedMovie.runtime % 60}m</Text>
               )}
             </View>
           </View>
@@ -91,9 +93,9 @@ export default function DetailsScreen({ route, navigation }) {
           </View>
 
           {/* Genres */}
-          {currentMovie.genres && (
+          {selectedMovie.genres && (
             <View style={styles.genresContainer}>
-              {currentMovie.genres.map((genre) => (
+              {selectedMovie.genres.map((genre) => (
                 <View key={genre.id} style={[styles.genreChip, { backgroundColor: colors.card, borderColor: colors.border }]}>
                   <Text style={[styles.genreText, { color: colors.text }]}>{genre.name}</Text>
                 </View>
@@ -104,15 +106,15 @@ export default function DetailsScreen({ route, navigation }) {
           {/* Overview */}
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Overview</Text>
-            <Text style={[styles.overview, { color: colors.textSecondary }]}>{currentMovie.overview || 'No overview available.'}</Text>
+            <Text style={[styles.overview, { color: colors.textSecondary }]}>{selectedMovie.overview || 'No overview available.'}</Text>
           </View>
 
           {/* Cast */}
-          {currentMovie.credits?.cast && currentMovie.credits.cast.length > 0 && (
+          {selectedMovie.credits?.cast && selectedMovie.credits.cast.length > 0 && (
             <View style={styles.section}>
               <Text style={[styles.sectionTitle, { color: colors.text }]}>Cast</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                {currentMovie.credits.cast.slice(0, 10).map((actor) => (
+                {selectedMovie.credits.cast.slice(0, 10).map((actor) => (
                   <View key={actor.id} style={[styles.castCard, { backgroundColor: colors.card }]}>
                     <Image
                       source={{

@@ -1,32 +1,43 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import { View, Text, ScrollView, FlatList, StyleSheet, RefreshControl } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
 import { Feather } from '@expo/vector-icons';
-import { fetchTrendingMovies, fetchPopularMovies } from '../../store/moviesSlice';
 import MovieCard from '../../components/MovieCard';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { useTheme } from '../../hooks/useTheme';
+import { useAuth } from '../../features/auth/hooks/useAuth';
+import { useMovies } from '../../features/movies/hooks/useMovies';
 
 export default function HomeScreen({ navigation }) {
-  const dispatch = useDispatch();
-  const { colors } = useSelector((state) => state.theme);
-  const { user } = useSelector((state) => state.auth);
-  const { trending, popular, isLoading } = useSelector((state) => state.movies);
-  const [refreshing, setRefreshing] = React.useState(false);
+  const { theme } = useTheme();
+  const colors = theme.colors;
+  const { user } = useAuth();
+  const { trending, popular, isLoading, getTrending, getPopular } = useMovies();
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     loadMovies();
   }, []);
 
-  const loadMovies = () => {
-    dispatch(fetchTrendingMovies());
-    dispatch(fetchPopularMovies());
-  };
+  const loadMovies = useCallback(() => {
+    getTrending();
+    getPopular();
+  }, [getTrending, getPopular]);
 
-  const onRefresh = async () => {
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await loadMovies();
     setRefreshing(false);
-  };
+  }, [loadMovies]);
+
+  const handleMoviePress = useCallback((movie) => {
+    navigation.navigate('Details', { movieId: movie.id });
+  }, [navigation]);
+
+  const renderMovieCard = useCallback(({ item }) => (
+    <MovieCard movie={item} onPress={handleMoviePress} />
+  ), [handleMoviePress]);
+
+  const keyExtractor = useCallback((item) => item.id.toString(), []);
 
   if (isLoading && !trending.length && !popular.length) {
     return <LoadingSpinner />;
@@ -34,7 +45,13 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}>
+      <ScrollView refreshControl={
+        <RefreshControl 
+          refreshing={refreshing} 
+          onRefresh={onRefresh} 
+          tintColor={colors.primary} 
+        />
+      }>
         {/* Header */}
         <View style={[styles.header, { borderBottomColor: colors.border }]}>
           <View>
@@ -54,11 +71,13 @@ export default function HomeScreen({ navigation }) {
             horizontal
             showsHorizontalScrollIndicator={false}
             data={trending}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => (
-              <MovieCard movie={item} onPress={() => navigation.navigate('Details', { movieId: item.id })} />
-            )}
+            keyExtractor={keyExtractor}
+            renderItem={renderMovieCard}
             contentContainerStyle={styles.listContent}
+            removeClippedSubviews={true}
+            maxToRenderPerBatch={5}
+            initialNumToRender={3}
+            windowSize={5}
           />
         </View>
 
@@ -72,11 +91,13 @@ export default function HomeScreen({ navigation }) {
             horizontal
             showsHorizontalScrollIndicator={false}
             data={popular}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => (
-              <MovieCard movie={item} onPress={() => navigation.navigate('Details', { movieId: item.id })} />
-            )}
+            keyExtractor={keyExtractor}
+            renderItem={renderMovieCard}
             contentContainerStyle={styles.listContent}
+            removeClippedSubviews={true}
+            maxToRenderPerBatch={5}
+            initialNumToRender={3}
+            windowSize={5}
           />
         </View>
       </ScrollView>

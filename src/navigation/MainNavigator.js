@@ -2,7 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Feather } from '@expo/vector-icons';
-import { useSelector } from 'react-redux';
+import { useTheme } from '../hooks/useTheme';
 import HomeScreen from '../screens/Home/HomeScreen';
 import SearchScreen from '../screens/Home/SearchScreen';
 import DetailsScreen from '../screens/Home/DetailsScreen';
@@ -25,13 +25,14 @@ function SearchStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="SearchMain" component={SearchScreen} />
-      <Stack.Screen name="SearchDetails" component={DetailsScreen} />
+      <Stack.Screen name="Details" component={DetailsScreen} />
     </Stack.Navigator>
   );
 }
 
 export default function MainNavigator() {
-  const { colors } = useSelector((state) => state.theme);
+  const { theme } = useTheme();
+  const colors = theme.colors;
 
   return (
     <Tab.Navigator

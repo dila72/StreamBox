@@ -7,11 +7,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Feather } from '@expo/vector-icons';
 import { registerUser, clearError } from '../../store/authSlice';
 import { validateField, registerSchema } from '../../utils/validation';
+import { useTheme } from '../../hooks/useTheme';
 
 export default function RegisterScreen({ navigation }) {
   const dispatch = useDispatch();
   const { isLoading, error } = useSelector((state) => state.auth);
-  const { colors } = useSelector((state) => state.theme);
+  const { theme } = useTheme();
+  const colors = theme.colors;
 
   const [formData, setFormData] = useState({
     firstName: '', lastName: '', email: '', username: '', password: '', confirmPassword: '',
@@ -29,8 +31,8 @@ export default function RegisterScreen({ navigation }) {
 
   const handleInputChange = async (field, value) => {
     setFormData({ ...formData, [field]: value });
-    const fieldError = await validateField(registerSchema, field, value);
-    setErrors({ ...errors, [field]: fieldError });
+    const fieldValidation = await validateField(registerSchema, field, value);
+    setErrors({ ...errors, [field]: fieldValidation.error });
   };
 
   const handleRegister = async () => {

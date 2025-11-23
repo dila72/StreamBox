@@ -14,11 +14,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Feather } from '@expo/vector-icons';
 import { loginUser, clearError } from '../../store/authSlice';
 import { validateField, loginSchema } from '../../utils/validation';
+import { useTheme } from '../../hooks/useTheme';
 
 export default function LoginScreen({ navigation }) {
   const dispatch = useDispatch();
   const { isLoading, error } = useSelector((state) => state.auth);
-  const { colors } = useSelector((state) => state.theme);
+  const { theme } = useTheme();
+  const colors = theme.colors;
 
   const [formData, setFormData] = useState({
     username: '',
@@ -39,8 +41,8 @@ export default function LoginScreen({ navigation }) {
     setFormData({ ...formData, [field]: value });
     
     // Validate field on change
-    const fieldError = await validateField(loginSchema, field, value);
-    setErrors({ ...errors, [field]: fieldError });
+    const fieldValidation = await validateField(loginSchema, field, value);
+    setErrors({ ...errors, [field]: fieldValidation.error });
   };
 
   const handleLogin = async () => {
