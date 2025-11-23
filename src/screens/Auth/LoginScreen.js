@@ -62,14 +62,6 @@ export default function LoginScreen({ navigation }) {
     }
   };
 
-  // Demo credentials hint
-  const fillDemoCredentials = () => {
-    setFormData({
-      username: 'emilys',
-      password: 'emilyspass',
-    });
-  };
-
   return (
     <KeyboardAvoidingView
       style={[styles.container, { backgroundColor: colors.background }]}
@@ -164,17 +156,6 @@ export default function LoginScreen({ navigation }) {
             )}
           </TouchableOpacity>
 
-          {/* Demo Credentials */}
-          <TouchableOpacity
-            style={[styles.demoButton, { borderColor: colors.border }]}
-            onPress={fillDemoCredentials}
-          >
-            <Feather name="zap" size={16} color={colors.warning} />
-            <Text style={[styles.demoText, { color: colors.textSecondary }]}>
-              Fill Demo Credentials
-            </Text>
-          </TouchableOpacity>
-
           {/* Register Link */}
           <View style={styles.registerContainer}>
             <Text style={[styles.registerText, { color: colors.textSecondary }]}>
@@ -186,14 +167,6 @@ export default function LoginScreen({ navigation }) {
               </Text>
             </TouchableOpacity>
           </View>
-        </View>
-
-        {/* Info Box */}
-        <View style={[styles.infoBox, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <Feather name="info" size={16} color={colors.info} />
-          <Text style={[styles.infoText, { color: colors.textSecondary }]}>
-            Use demo credentials or create a new account
-          </Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

@@ -30,9 +30,32 @@ export default function RegisterScreen({ navigation }) {
   }, [error]);
 
   const handleInputChange = async (field, value) => {
-    setFormData({ ...formData, [field]: value });
-    const fieldValidation = await validateField(registerSchema, field, value);
-    setErrors({ ...errors, [field]: fieldValidation.error });
+    const updatedFormData = { ...formData, [field]: value };
+    setFormData(updatedFormData);
+    
+    // For confirmPassword, validate with the full form context including password
+    if (field === 'confirmPassword') {
+      try {
+        await registerSchema.validateAt('confirmPassword', updatedFormData);
+        setErrors({ ...errors, confirmPassword: '' });
+      } catch (err) {
+        setErrors({ ...errors, confirmPassword: err.message });
+      }
+    } else {
+      // For other fields, validate individually
+      const fieldValidation = await validateField(registerSchema, field, value);
+      setErrors({ ...errors, [field]: fieldValidation.error });
+      
+      // If password changes and confirmPassword has a value, revalidate confirmPassword
+      if (field === 'password' && updatedFormData.confirmPassword) {
+        try {
+          await registerSchema.validateAt('confirmPassword', updatedFormData);
+          setErrors((prev) => ({ ...prev, [field]: fieldValidation.error, confirmPassword: '' }));
+        } catch (err) {
+          setErrors((prev) => ({ ...prev, [field]: fieldValidation.error, confirmPassword: err.message }));
+        }
+      }
+    }
   };
 
   const handleRegister = async () => {
