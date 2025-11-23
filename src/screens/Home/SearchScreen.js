@@ -28,6 +28,9 @@ export default function SearchScreen({ navigation }) {
   // Ensure searchResults has the correct structure
   const results = searchResults?.results || [];
   const isSearching = searchResults?.isLoading || false;
+  
+  // Only show results if there's an active query
+  const shouldShowResults = query.trim().length > 0;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -37,7 +40,12 @@ export default function SearchScreen({ navigation }) {
       
       <SearchBar value={query} onChangeText={setQuery} onSearch={handleSearch} />
 
-      {isSearching ? (
+      {!shouldShowResults ? (
+        <View style={styles.center}>
+          <Feather name="film" size={64} color={colors.textSecondary} />
+          <Text style={[styles.message, { color: colors.textSecondary }]}>Search for movies</Text>
+        </View>
+      ) : isSearching ? (
         <View style={styles.center}>
           <Text style={[styles.message, { color: colors.textSecondary }]}>Searching...</Text>
         </View>
@@ -54,15 +62,10 @@ export default function SearchScreen({ navigation }) {
           )}
           contentContainerStyle={styles.listContent}
         />
-      ) : query.length > 0 ? (
+      ) : (
         <View style={styles.center}>
           <Feather name="search" size={64} color={colors.textSecondary} />
           <Text style={[styles.message, { color: colors.textSecondary }]}>No results found</Text>
-        </View>
-      ) : (
-        <View style={styles.center}>
-          <Feather name="film" size={64} color={colors.textSecondary} />
-          <Text style={[styles.message, { color: colors.textSecondary }]}>Search for movies</Text>
         </View>
       )}
     </View>
