@@ -10,8 +10,13 @@ export const loginUser = createAsyncThunk(
     try {
       const response = await authAPI.login(username, password);
       
-      // Save token securely
-      await secureStorage.save(STORAGE_KEYS.AUTH_TOKEN, response.token);
+      // Ensure token is a string before saving to SecureStore
+      const tokenString = String(response.token || '');
+      
+      // Save token securely (only if valid)
+      if (tokenString) {
+        await secureStorage.save(STORAGE_KEYS.AUTH_TOKEN, tokenString);
+      }
       
       // Save user data
       await storage.save(STORAGE_KEYS.USER_DATA, response.user);
@@ -29,8 +34,13 @@ export const registerUser = createAsyncThunk(
     try {
       const response = await authAPI.register(userData);
       
-      // Save token securely
-      await secureStorage.save(STORAGE_KEYS.AUTH_TOKEN, response.token);
+      // Ensure token is a string before saving to SecureStore
+      const tokenString = String(response.token || '');
+      
+      // Save token securely (only if valid)
+      if (tokenString) {
+        await secureStorage.save(STORAGE_KEYS.AUTH_TOKEN, tokenString);
+      }
       
       // Save user data
       await storage.save(STORAGE_KEYS.USER_DATA, response.user);

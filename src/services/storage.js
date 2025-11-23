@@ -6,6 +6,18 @@ export const secureStorage = {
   // Save secure item
   save: async (key, value) => {
     try {
+      // Ensure value is a string
+      if (typeof value !== 'string') {
+        console.warn(`SecureStore: Converting non-string value to string for key "${key}"`);
+        value = String(value);
+      }
+      
+      // Don't save empty strings
+      if (!value) {
+        console.warn(`SecureStore: Attempted to save empty value for key "${key}"`);
+        return false;
+      }
+      
       await SecureStore.setItemAsync(key, value);
       return true;
     } catch (error) {
