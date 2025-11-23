@@ -1,10 +1,11 @@
 import React from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { useSelector } from 'react-redux';
+import { useTheme } from '../hooks/useTheme';
 
 export default function SearchBar({ value, onChangeText, onSearch, placeholder }) {
-  const { colors } = useSelector((state) => state.theme);
+  const { theme } = useTheme();
+  const colors = theme.colors;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.card, borderColor: colors.border }]}>

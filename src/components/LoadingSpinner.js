@@ -1,9 +1,10 @@
 import React from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { useSelector } from 'react-redux';
+import { useTheme } from '../hooks/useTheme';
 
 export default function LoadingSpinner() {
-  const { colors } = useSelector((state) => state.theme);
+  const { theme } = useTheme();
+  const colors = theme.colors;
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ActivityIndicator size="large" color={colors.primary} />
