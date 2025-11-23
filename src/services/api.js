@@ -94,6 +94,35 @@ export const authAPI = {
   // Login
   login: async (username, password) => {
     try {
+      // First, check if this is a locally registered user
+      const { storage } = require('./storage');
+      const { STORAGE_KEYS } = require('../utils/constants');
+      const registeredUsers = await storage.get(STORAGE_KEYS.REGISTERED_USERS) || [];
+      
+      const localUser = registeredUsers.find(u => u.username === username);
+      
+      if (localUser) {
+        // Verify password for local user
+        if (localUser.password === password) {
+          // Generate a new mock token
+          const mockToken = `local_token_${Date.now()}`;
+          return {
+            token: mockToken,
+            user: {
+              id: localUser.id,
+              username: localUser.username,
+              email: localUser.email,
+              firstName: localUser.firstName,
+              lastName: localUser.lastName,
+              image: localUser.image,
+            },
+          };
+        } else {
+          throw new Error('Invalid username or password');
+        }
+      }
+      
+      // If not a local user, try DummyJSON API
       const url = `${AUTH_API_URL}${API_ENDPOINTS.AUTH_LOGIN}`;
       const response = await apiRequest(url, {
         method: 'POST',
@@ -123,36 +152,55 @@ export const authAPI = {
   // Register (Using DummyJSON add user endpoint)
   register: async ({ username, email, password, firstName, lastName }) => {
     try {
-      const url = `${AUTH_API_URL}${API_ENDPOINTS.AUTH_REGISTER}`;
-      const response = await apiRequest(url, {
-        method: 'POST',
-        body: JSON.stringify({
-          username,
-          email,
-          password,
-          firstName,
-          lastName,
-          age: 25, // Default age for dummy API
-        }),
-      });
-
-      // Since DummyJSON doesn't return a token on registration, we'll simulate one
-      // In a real app, you would get this from your backend
-      const mockToken = `mock_token_${Date.now()}`;
+      // Store user locally since DummyJSON doesn't persist new users
+      const { storage } = require('./storage');
+      const { STORAGE_KEYS } = require('../utils/constants');
+      
+      // Get existing registered users
+      const registeredUsers = await storage.get(STORAGE_KEYS.REGISTERED_USERS) || [];
+      
+      // Check if username already exists
+      if (registeredUsers.find(u => u.username === username)) {
+        throw new Error('Username already exists');
+      }
+      
+      // Check if email already exists
+      if (registeredUsers.find(u => u.email === email)) {
+        throw new Error('Email already exists');
+      }
+      
+      // Create new user
+      const newUser = {
+        id: Date.now(), // Generate unique ID
+        username,
+        email,
+        password, // In production, this should be hashed!
+        firstName,
+        lastName,
+        image: `https://via.placeholder.com/150/1e293b/ffffff?text=${firstName.charAt(0)}`,
+        createdAt: new Date().toISOString(),
+      };
+      
+      // Add to registered users
+      registeredUsers.push(newUser);
+      await storage.save(STORAGE_KEYS.REGISTERED_USERS, registeredUsers);
+      
+      // Generate token
+      const mockToken = `local_token_${Date.now()}`;
 
       return {
         token: mockToken,
         user: {
-          id: response.id,
-          username: response.username,
-          email: response.email,
-          firstName: response.firstName,
-          lastName: response.lastName,
-          image: 'https://via.placeholder.com/150/1e293b/ffffff?text=' + response.firstName.charAt(0),
+          id: newUser.id,
+          username: newUser.username,
+          email: newUser.email,
+          firstName: newUser.firstName,
+          lastName: newUser.lastName,
+          image: newUser.image,
         },
       };
     } catch (error) {
-      throw new Error('Registration failed. Please try again.');
+      throw new Error(error.message || 'Registration failed. Please try again.');
     }
   },
 

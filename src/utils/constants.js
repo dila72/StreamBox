@@ -38,6 +38,7 @@ export const STORAGE_KEYS = {
   USER_DATA: 'user_data',
   FAVORITES: 'favorites',
   THEME: 'theme_preference',
+  REGISTERED_USERS: 'registered_users',
 };
 
 // Dummy API for Authentication
