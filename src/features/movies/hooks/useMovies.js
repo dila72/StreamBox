@@ -8,8 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchTrendingMovies,
   fetchPopularMovies,
-  fetchTopRatedMovies,
-  fetchUpcomingMovies,
+  fetchMoviesByCategory,
   fetchMovieDetails,
   searchMovies,
   clearSearchResults,
@@ -28,11 +27,11 @@ export const useMovies = () => {
   }, [dispatch]);
 
   const getTopRated = useCallback(() => {
-    dispatch(fetchTopRatedMovies());
+    dispatch(fetchMoviesByCategory({ category: 'top_rated' }));
   }, [dispatch]);
 
   const getUpcoming = useCallback(() => {
-    dispatch(fetchUpcomingMovies());
+    dispatch(fetchMoviesByCategory({ category: 'upcoming' }));
   }, [dispatch]);
 
   const getMovieDetails = useCallback((movieId) => {
@@ -52,20 +51,20 @@ export const useMovies = () => {
   }, [dispatch]);
 
   // Memoized computed values
-  const hasTrendingMovies = useMemo(() => movies.trending.length > 0, [movies.trending]);
-  const hasSearchResults = useMemo(() => movies.searchResults.length > 0, [movies.searchResults]);
+  const hasTrendingMovies = useMemo(() => (movies.trending?.results || []).length > 0, [movies.trending]);
+  const hasSearchResults = useMemo(() => (movies.searchResults?.results || []).length > 0, [movies.searchResults]);
 
   return {
-    trending: movies.trending,
-    popular: movies.popular,
-    topRated: movies.topRated,
-    upcoming: movies.upcoming,
+    trending: movies.trending?.results || [],
+    popular: movies.popular?.results || [],
+    topRated: movies.categories?.top_rated?.results || [],
+    upcoming: movies.categories?.upcoming?.results || [],
     searchResults: movies.searchResults,
-    currentMovie: movies.currentMovie,
-    isLoading: movies.isLoading,
-    isSearching: movies.isSearching,
-    error: movies.error,
-    searchQuery: movies.searchQuery,
+    currentMovie: movies.selectedMovie,
+    isLoading: movies.trending?.isLoading || movies.popular?.isLoading || false,
+    isSearching: movies.searchResults?.isLoading || false,
+    error: movies.trending?.error || movies.popular?.error || null,
+    searchQuery: movies.searchResults?.query || '',
     hasTrendingMovies,
     hasSearchResults,
     getTrending,
