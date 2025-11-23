@@ -25,6 +25,10 @@ export default function SearchScreen({ navigation }) {
     dispatch(clearSearchResults());
   };
 
+  // Ensure searchResults has the correct structure
+  const results = searchResults?.results || [];
+  const isSearching = searchResults?.isLoading || false;
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
@@ -33,13 +37,13 @@ export default function SearchScreen({ navigation }) {
       
       <SearchBar value={query} onChangeText={setQuery} onSearch={handleSearch} />
 
-      {searchResults.isLoading ? (
+      {isSearching ? (
         <View style={styles.center}>
           <Text style={[styles.message, { color: colors.textSecondary }]}>Searching...</Text>
         </View>
-      ) : searchResults.results.length > 0 ? (
+      ) : results.length > 0 ? (
         <FlatList
-          data={searchResults.results}
+          data={results}
           keyExtractor={(item) => item.id.toString()}
           numColumns={2}
           columnWrapperStyle={styles.row}
