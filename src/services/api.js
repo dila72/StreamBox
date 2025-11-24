@@ -4,18 +4,26 @@ import {
   AUTH_API_URL, 
   API_ENDPOINTS 
 } from '../utils/constants';
+import bcrypt from 'bcryptjs';
+import logger from '../utils/logger';
 
-// Generic API request function
+// Generic API request function with timeout
 const apiRequest = async (url, options = {}) => {
   try {
+    const { TIMEOUTS } = require('../utils/constants');
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), TIMEOUTS.API_TIMEOUT || 15000);
+    
     const response = await fetch(url, {
       ...options,
+      signal: controller.signal,
       headers: {
         'Content-Type': 'application/json',
         ...options.headers,
       },
     });
-
+    
+    clearTimeout(timeoutId);
     const data = await response.json();
 
     if (!response.ok) {
@@ -24,7 +32,10 @@ const apiRequest = async (url, options = {}) => {
 
     return data;
   } catch (error) {
-    console.error('API Error:', error);
+    if (error.name === 'AbortError') {
+      throw new Error('Request timeout - please check your connection');
+    }
+    logger.error('API Error:', error);
     throw error;
   }
 };
@@ -102,8 +113,9 @@ export const authAPI = {
       const localUser = registeredUsers.find(u => u.username === username);
       
       if (localUser) {
-        // Verify password for local user
-        if (localUser.password === password) {
+        // Verify password for local user (compare hashed password)
+        const isPasswordValid = await bcrypt.compare(password, localUser.password);
+        if (isPasswordValid) {
           // Generate a new mock token
           const mockToken = `local_token_${Date.now()}`;
           return {
@@ -169,12 +181,15 @@ export const authAPI = {
         throw new Error('Email already exists');
       }
       
+      // Hash password before storing
+      const hashedPassword = await bcrypt.hash(password, 10);
+      
       // Create new user
       const newUser = {
         id: Date.now(), // Generate unique ID
         username,
         email,
-        password, // In production, this should be hashed!
+        password: hashedPassword,
         firstName,
         lastName,
         image: `https://via.placeholder.com/150/1e293b/ffffff?text=${firstName.charAt(0)}`,

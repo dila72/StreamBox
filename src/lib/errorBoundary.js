@@ -6,6 +6,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Feather } from '@expo/vector-icons';
+import logger from '../utils/logger';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -23,7 +24,7 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     // Log error to console in development
-    console.error('Error Boundary caught an error:', error, errorInfo);
+    logger.error('Error Boundary caught an error:', error, errorInfo);
     
     // You can also log to an error reporting service here
     this.setState({

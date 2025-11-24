@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
+import logger from '../utils/logger';
 
 // Secure Storage (for sensitive data like tokens)
 export const secureStorage = {
@@ -8,20 +9,20 @@ export const secureStorage = {
     try {
       // Ensure value is a string
       if (typeof value !== 'string') {
-        console.warn(`SecureStore: Converting non-string value to string for key "${key}"`);
+        logger.warn(`SecureStore: Converting non-string value to string for key "${key}"`);
         value = String(value);
       }
       
       // Don't save empty strings
       if (!value) {
-        console.warn(`SecureStore: Attempted to save empty value for key "${key}"`);
+        logger.warn(`SecureStore: Attempted to save empty value for key "${key}"`);
         return false;
       }
       
       await SecureStore.setItemAsync(key, value);
       return true;
     } catch (error) {
-      console.error('SecureStore save error:', error);
+      logger.error('SecureStore save error:', error);
       return false;
     }
   },
@@ -32,7 +33,7 @@ export const secureStorage = {
       const value = await SecureStore.getItemAsync(key);
       return value;
     } catch (error) {
-      console.error('SecureStore get error:', error);
+      logger.error('SecureStore get error:', error);
       return null;
     }
   },
@@ -43,7 +44,7 @@ export const secureStorage = {
       await SecureStore.deleteItemAsync(key);
       return true;
     } catch (error) {
-      console.error('SecureStore remove error:', error);
+      logger.error('SecureStore remove error:', error);
       return false;
     }
   },
@@ -58,7 +59,7 @@ export const storage = {
       await AsyncStorage.setItem(key, jsonValue);
       return true;
     } catch (error) {
-      console.error('AsyncStorage save error:', error);
+      logger.error('AsyncStorage save error:', error);
       return false;
     }
   },
@@ -69,7 +70,7 @@ export const storage = {
       const jsonValue = await AsyncStorage.getItem(key);
       return jsonValue != null ? JSON.parse(jsonValue) : null;
     } catch (error) {
-      console.error('AsyncStorage get error:', error);
+      logger.error('AsyncStorage get error:', error);
       return null;
     }
   },
@@ -80,7 +81,7 @@ export const storage = {
       await AsyncStorage.removeItem(key);
       return true;
     } catch (error) {
-      console.error('AsyncStorage remove error:', error);
+      logger.error('AsyncStorage remove error:', error);
       return false;
     }
   },
@@ -91,7 +92,7 @@ export const storage = {
       await AsyncStorage.clear();
       return true;
     } catch (error) {
-      console.error('AsyncStorage clear error:', error);
+      logger.error('AsyncStorage clear error:', error);
       return false;
     }
   },

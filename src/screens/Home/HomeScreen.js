@@ -3,6 +3,7 @@ import { View, Text, ScrollView, FlatList, StyleSheet, RefreshControl } from 're
 import { Feather } from '@expo/vector-icons';
 import MovieCard from '../../components/MovieCard';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { MovieListSkeleton } from '../../components/SkeletonLoader';
 import { useTheme } from '../../hooks/useTheme';
 import { useAuth } from '../../features/auth/hooks/useAuth';
 import { useMovies } from '../../features/movies/hooks/useMovies';
@@ -67,18 +68,22 @@ export default function HomeScreen({ navigation }) {
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Trending Now</Text>
             <Feather name="trending-up" size={20} color={colors.primary} />
           </View>
-          <FlatList
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            data={trending}
-            keyExtractor={keyExtractor}
-            renderItem={renderMovieCard}
-            contentContainerStyle={styles.listContent}
-            removeClippedSubviews={true}
-            maxToRenderPerBatch={5}
-            initialNumToRender={3}
-            windowSize={5}
-          />
+          {isLoading && !trending.length ? (
+            <MovieListSkeleton count={3} />
+          ) : (
+            <FlatList
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              data={trending}
+              keyExtractor={keyExtractor}
+              renderItem={renderMovieCard}
+              contentContainerStyle={styles.listContent}
+              removeClippedSubviews={true}
+              maxToRenderPerBatch={5}
+              initialNumToRender={3}
+              windowSize={5}
+            />
+          )}
         </View>
 
         {/* Popular Section */}
@@ -87,18 +92,22 @@ export default function HomeScreen({ navigation }) {
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Popular Movies</Text>
             <Feather name="star" size={20} color={colors.rating} />
           </View>
-          <FlatList
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            data={popular}
-            keyExtractor={keyExtractor}
-            renderItem={renderMovieCard}
-            contentContainerStyle={styles.listContent}
-            removeClippedSubviews={true}
-            maxToRenderPerBatch={5}
-            initialNumToRender={3}
-            windowSize={5}
-          />
+          {isLoading && !popular.length ? (
+            <MovieListSkeleton count={3} />
+          ) : (
+            <FlatList
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              data={popular}
+              keyExtractor={keyExtractor}
+              renderItem={renderMovieCard}
+              contentContainerStyle={styles.listContent}
+              removeClippedSubviews={true}
+              maxToRenderPerBatch={5}
+              initialNumToRender={3}
+              windowSize={5}
+            />
+          )}
         </View>
       </ScrollView>
     </View>

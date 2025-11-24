@@ -3,12 +3,22 @@
  * Central place for all environment variables and API configurations
  */
 
+import {
+  TMDB_API_KEY,
+  TMDB_BASE_URL,
+  TMDB_IMAGE_BASE_URL,
+  AUTH_API_URL,
+  APP_NAME,
+  APP_VERSION,
+  APP_BUNDLE_ID,
+} from '@env';
+
 // API Configuration
 export const API_CONFIG = {
   TMDB: {
-    BASE_URL: 'https://api.themoviedb.org/3',
-    API_KEY: 'f1143c7f2b0e03bebc5224c2d7943248',
-    IMAGE_BASE_URL: 'https://image.tmdb.org/t/p',
+    BASE_URL: TMDB_BASE_URL || 'https://api.themoviedb.org/3',
+    API_KEY: TMDB_API_KEY,
+    IMAGE_BASE_URL: TMDB_IMAGE_BASE_URL || 'https://image.tmdb.org/t/p',
     IMAGE_SIZES: {
       POSTER: {
         SMALL: 'w185',
@@ -25,15 +35,15 @@ export const API_CONFIG = {
     },
   },
   DUMMYJSON: {
-    BASE_URL: 'https://dummyjson.com',
+    BASE_URL: AUTH_API_URL || 'https://dummyjson.com',
   },
 };
 
 // App Configuration
 export const APP_CONFIG = {
-  NAME: 'StreamBox',
-  VERSION: '1.0.0',
-  BUNDLE_ID: 'com.streambox.app',
+  NAME: APP_NAME || 'StreamBox',
+  VERSION: APP_VERSION || '1.0.0',
+  BUNDLE_ID: APP_BUNDLE_ID || 'com.streambox.app',
   SCHEME: 'streambox',
 };
 
